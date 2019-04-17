@@ -1,0 +1,22 @@
+name: shopping_cart
+description: An entitas_ff example project.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  entitas_ff:
+    path: ../../
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+
+  uses-material-design: true

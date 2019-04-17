@@ -1,0 +1,23 @@
+name: counter_app_with_systems
+description: An example App for entitas_ff.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^0.1.2
+
+dev_dependencies:
+  entitas_ff:
+    path: ../../
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+
+  uses-material-design: true
