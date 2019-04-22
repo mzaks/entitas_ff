@@ -9,11 +9,11 @@ import 'search_result_widget.dart';
 void main() => runApp(buildApp());
 
 Widget buildApp() {
-  final m = EntityManager();
-  m.setUnique(SearchStateComponent(SearchState.none));
-  GithubService(manager: m);
+  final em = EntityManager();
+  em.setUnique(SearchStateComponent(SearchState.none));
+  GithubService(manager: em);
   return EntityManagerProvider(
-    entityManager: m,
+    entityManager: em,
     child: MaterialApp(
       title: 'EntitasFF Github Search',
       theme: ThemeData(
