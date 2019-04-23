@@ -347,6 +347,13 @@ class Group implements EntityObserver {
   }
   List<Entity> __entities;
 
+  /// Helper method to perform destruction of all entities in the group.
+  destroyAllEntities() {
+    for (var e in entities) {
+      e.destroy();
+    }
+  }
+
   /// Groups are equal if their matchers are equal.
   @override
   bool operator ==(Object other) =>
