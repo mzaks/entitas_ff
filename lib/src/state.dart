@@ -392,7 +392,7 @@ abstract class EntityManagerObserver {
   entityCreated(Entity e);
 }
 
-/// EntityManager is the central peace of entitas_ff. It can b eunderstood as a central managing data structure.
+/// EntityManager is the central peace of entitas_ff. It can be understood as a central managing data structure.
 /// It manages the lifecycle of [Entity] instances and stores instances of [Group], which we use to access entities with certain qualities.
 /// EntityManager is observable, see `addObserver`, `removeObserver`.
 class EntityManager implements EntityObserver {
@@ -479,7 +479,7 @@ class EntityManager implements EntityObserver {
     return e;
   }
 
-  /// Removes unqiue component on an entity.
+  /// Removes unique component on an entity.
   /// If entity does not have any other components after removal, it is destroyed.
   removeUnique<T extends UniqueComponent>() {
     var e = _uniqueEntities[T];
@@ -492,7 +492,7 @@ class EntityManager implements EntityObserver {
     }
   }
 
-  /// Returns the component instance or `null`.
+  /// Returns the component instance or throws an exception if component is `null`.
   T getUnique<T extends UniqueComponent>() {
     final component = _uniqueEntities[T]?.getOrNull<T>();
     if (component == null) throw new Exception("Component is null");
@@ -504,7 +504,7 @@ class EntityManager implements EntityObserver {
     return _uniqueEntities[T]?.getOrNull<T>();
   }
 
-  /// Returns [Entity] instance which hold the unique component
+  /// Returns [Entity] instance which hold the unique component, or throws an exception if component is `null`.
   Entity getUniqueEntity<T extends UniqueComponent>() {
     final entity = _uniqueEntities[T];
     if (entity == null) throw new Exception("Entity is null");

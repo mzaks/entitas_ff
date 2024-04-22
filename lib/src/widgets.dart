@@ -132,9 +132,10 @@ class EntityObservingWidgetState extends State<EntityObservingWidget> implements
   }
 }
 
+/// Widget builder for [Entity] not found.
 typedef Widget EntityNotFoundWidgetBuilder(BuildContext context);
 
-/// Widget which observes an entity and rebuilds it's child when the entity has changed.
+/// Widget which observes an entity (or null) and rebuilds it's child when the entity has changed.
 class EntityOrNullObservingWidget extends StatefulWidget {
   /// Function which returns an entity the widget should observe.
   final EntityProvider provider;
@@ -148,7 +149,7 @@ class EntityOrNullObservingWidget extends StatefulWidget {
   State<StatefulWidget> createState() => EntityObservingWidgetState();
 }
 
-/// State class for [EntityObservingWidget].
+/// State class for [EntityOrNullObservingWidget].
 class EntityOrNullObservingWidgetState extends State<EntityOrNullObservingWidget> implements EntityObserver {
   // holds reference to entity under observation
   Entity? _entity;
