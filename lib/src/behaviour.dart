@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 import 'state.dart';
 
-/// An inteface which user need to implement in order to mark a class as a system.
+/// An interface which user need to implement in order to mark a class as a system.
 abstract class System {
 }
 
@@ -22,7 +22,7 @@ abstract class CleanupSystem extends System {
 
 /// An abstract class which user should implement if they want their systems to hold a reference to [EntityManager]
 abstract class EntityManagerSystem extends System {
-  EntityManager __manager;
+  late EntityManager __manager;
   @mustCallSuper
   set _manager(EntityManager m){
     __manager = m;
@@ -56,7 +56,7 @@ enum GroupChangeEvent {
 ///     }
 abstract class ReactiveSystem extends EntityManagerSystem implements ExecuteSystem, GroupObserver {
   // holds the group the reactive system is observing
-  Group _group;
+  late Group _group;
   // holds references to entities which changed since last execution
   Set<Entity> _collectedEntities = Set();
 
@@ -78,7 +78,6 @@ abstract class ReactiveSystem extends EntityManagerSystem implements ExecuteSyst
   @override
   set _manager(EntityManager m) {
     super._manager = m;
-    assert(matcher != null, "Matcher was not specified in system " + this.runtimeType.toString());
     _group = __manager.groupMatching(matcher);
     _group.addObserver(this);
   }
@@ -142,7 +141,7 @@ abstract class ReactiveSystem extends EntityManagerSystem implements ExecuteSyst
 ///     }
 abstract class TriggeredSystem extends EntityManagerSystem implements ExecuteSystem, GroupObserver {
   // holds the group the system is observing
-  Group _group;
+  late Group _group;
   // holds the flag if the system should be executed this time
   bool _triggered = false;
 
@@ -264,20 +263,19 @@ class RootSystem implements ExecuteSystem, InitSystem, CleanupSystem {
   }
 }
 
-/// ReactiveRootSystem is a [RootSystem] which triggeres it's child systems only if a state of an [EntityManager] or of any [Entity] have changed.
+/// ReactiveRootSystem is a [RootSystem] which triggers it's child systems only if a state of an [EntityManager] or of any [Entity] have changed.
 /// Users might use this implementation of [RootSystem] in order to minimise the amount of `execute` calls performed on every tick.
 /// User can provide a black list of component types which are excluded as meaningful execution triggeres.
 class ReactiveRootSystem extends RootSystem implements EntityManagerObserver, EntityObserver {
-
   // holds component types which are not considered as triggerable change
-  Set<Type> _blackList;
+  Set<Type> _blackList = Set.identity();
   // holds a flag which defines if `execute` method on children should be called
   var _shouldExecute = false;
   // holds a flag which defines if `cleanup` method on children should be called
   var _shouldCleanup = false;
 
-  ReactiveRootSystem(EntityManager entityManager, List<System> systems, {List<Type> blackList}) : super(entityManager, systems) {
-    _blackList = Set.from(blackList ?? []);
+  ReactiveRootSystem(EntityManager entityManager, List<System> systems, {List<Type>? blackList}) : super(entityManager, systems) {
+    if (blackList != null) _blackList = Set.from(blackList);
     entityManager.addObserver(this);
   }
 
@@ -298,7 +296,7 @@ class ReactiveRootSystem extends RootSystem implements EntityManagerObserver, En
   /// Implementation of [EntityObserver].
   /// Please don't call directly.
   @override
-  exchanged(Entity e, Component oldC, Component newC) {
+  exchanged(Entity e, Component? oldC, Component? newC) {
     if (_shouldExecute) {
       return;
     }

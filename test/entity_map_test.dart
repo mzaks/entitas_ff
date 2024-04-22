@@ -11,8 +11,8 @@ void main() {
 
     em.createEntity()..set(Name("Alex"))..set(Age(45));
 
-    expect(nameMap["Max"].get<Age>().value, 37);
-    expect(nameMap["Alex"].get<Age>().value, 45);
+    expect(nameMap["Max"]?.getOrNull<Age>()?.value, 37);
+    expect(nameMap["Alex"]?.getOrNull<Age>()?.value, 45);
   });
 
   test('Multi Map over age', (){
@@ -25,15 +25,15 @@ void main() {
     em.createEntity()..set(Name("Alex"))..set(Age(37));
 
     expect(ageMap[37].length, 2);
-    expect(ageMap[37].map((e) => e.get<Name>().value), containsAll(["Max", "Alex"]));
+    expect(ageMap[37].map((e) => e.getOrNull<Name>()?.value), containsAll(["Max", "Alex"]));
 
     expect(ageMap[45].length, 1);
-    expect(ageMap[45].map((e) => e.get<Name>().value), containsAll(["Maxim"]));
+    expect(ageMap[45].map((e) => e.getOrNull<Name>()?.value), containsAll(["Maxim"]));
 
     for (var e in ageMap[37]) {
       e.set(Age(45));
     }
     expect(ageMap[45].length, 3);
-    expect(ageMap[45].map((e) => e.get<Name>().value), containsAll(["Maxim", "Max", "Alex"]));
+    expect(ageMap[45].map((e) => e.getOrNull<Name>()?.value), containsAll(["Maxim", "Max", "Alex"]));
   });
 }

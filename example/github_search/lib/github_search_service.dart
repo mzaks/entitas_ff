@@ -13,8 +13,8 @@ class GithubService {
   final Group results;
 
   GithubService({
-    this.manager,
-    HttpClient client,
+    required this.manager,
+    HttpClient? client,
     this.baseUrl = "https://api.github.com/search/repositories?q=",
   })  : this.client = client ?? new HttpClient(),
       this.results = manager.group(all: [NameComponent, UrlComponent, AvatarUrlComponent]) {

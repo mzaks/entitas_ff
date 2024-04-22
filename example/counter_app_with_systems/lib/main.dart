@@ -80,7 +80,7 @@ class MyApp extends StatelessWidget {
                   provider: (m) => m.getUniqueEntity<CountComponent>(),
                   builder: (e, context) => Text(
                     e.get<CountComponent>().value.toString(),
-                    style: Theme.of(context).textTheme.display1,
+                    style: Theme.of(context).textTheme.displayMedium,
                   ),
                 )
               ],

@@ -14,8 +14,8 @@ class GithubService {
   final EntityMap<SearchResultComponent, String> _searchResultCache;
 
   GithubService({
-    @required manager,
-    HttpClient client,
+    required manager,
+    HttpClient? client,
     this.baseUrl = "https://api.github.com/search/repositories?q=",
   }) : this._client = client ?? new HttpClient(),
       this._manager = manager,
@@ -24,15 +24,13 @@ class GithubService {
   }
 
   search(String term) async {
-    var result = _searchResultCache[term];
-    if (result == null){
-      result = _manager.createEntity();
-      try {
-        var repositories = await _fetchResults(term);
-        result += SearchResultComponent(repositories, term);
-      } catch (error) {
-        result += SearchErrorComponent(error);
-      }
+    var result = _searchResultCache[term] ?? _manager.createEntity();
+
+    try {
+      var repositories = await _fetchResults(term);
+      result += SearchResultComponent(repositories, term);
+    } catch (error) {
+      result += SearchErrorComponent(error);
     }
     _manager.setUniqueOnEntity(CurrentResultFlagComponent(), result);
     var tick = _manager.getUnique<CurrentTickComponent>().value;
@@ -44,9 +42,7 @@ class GithubService {
     final response = await request.close();
     final results = json.decode(await response.transform(utf8.decoder).join());
     var list = (results['items'] as List);
-    if(list == null) {
-      throw results;
-    }
+
     return list.cast<Map<String, Object>>();
   }
 }

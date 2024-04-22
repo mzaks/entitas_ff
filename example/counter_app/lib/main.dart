@@ -39,12 +39,12 @@ class MyApp extends StatelessWidget {
                 Text(
                   'You have pushed the button this many times:',
                 ),
-                // Text widget represnting the count built by [EntityObservingWidget]
+                // Text widget representing the count built by [EntityObservingWidget]
                 EntityObservingWidget(
                   provider: (em) => em.getUniqueEntity<CountComponent>(),
                   builder: (e, context) => Text(
-                        e.get<CountComponent>().value.toString(),
-                        style: Theme.of(context).textTheme.display1,
+                        e.getOrNull<CountComponent>()?.value.toString() ?? "",
+                        style: Theme.of(context).textTheme.displayMedium,
                       ),
                 )
               ],
@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
             onPressed: () {
               final entityManager =
                   EntityManagerProvider.of(context).entityManager;
-              final count = entityManager.getUnique<CountComponent>().value;
+              final count = entityManager.getUnique<CountComponent>()?.value ?? 0;
               entityManager.setUnique(CountComponent(count + 1));
             },
             tooltip: 'increment count',

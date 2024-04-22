@@ -6,13 +6,13 @@ homepage: https://github.com/mzaks/entitas_ff
 version: 0.1.0
 
 environment:
-  sdk: '>=1.24.0 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
 dev_dependencies:
-  test: '>=0.12.24+2 <2.0.0'
+  test: ^1.18.0
   flutter_test:
     sdk: flutter

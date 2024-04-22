@@ -52,7 +52,7 @@ class MyHomePage extends StatelessWidget {
         title: EntityObservingWidget(
             provider: (em) => em.getUniqueEntity<TotalAmountLabelComponent>(),
             builder: (e, context){
-              final value = e?.get<TotalAmountLabelComponent>()?.value ?? "0";
+              final value = e.getOrNull<TotalAmountLabelComponent>()?.value ?? "0";
               return Text('Total: ($value)');
             },
         ),
@@ -83,9 +83,7 @@ class MyHomePage extends StatelessWidget {
 
 class ProductGrid extends StatelessWidget {
 
-  ProductGrid({
-    Key key,
-  }) : super(key: key);
+  ProductGrid() : super();
 
   @override
   Widget build(BuildContext context) {

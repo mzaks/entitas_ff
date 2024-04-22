@@ -1,7 +1,8 @@
 import 'package:entitas_ff/entitas_ff.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shopping_cart_complex/components.dart';
-import 'package:shopping_cart_complex/systems.dart';
+
+import '../lib/components.dart';
+import '../lib/systems.dart';
 
 void main() {
   test('Setup currency conversion', (){

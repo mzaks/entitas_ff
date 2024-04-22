@@ -17,10 +17,10 @@ class TickSystem extends EntityManagerSystem implements InitSystem, ExecuteSyste
 class ScheduleSearchSystem extends EntityManagerSystem implements ExecuteSystem {
   @override
   execute() {
-    var searchTermEntity = entityManager.getUniqueEntity<SearchTermComponent>();
+    var searchTermEntity = entityManager.getUniqueEntityOrNull<SearchTermComponent>();
     if (searchTermEntity == null) return;
     var tick = entityManager.getUnique<CurrentTickComponent>().value;
-    var searchTick = searchTermEntity.get<TickComponent>()?.value ?? 0;
+    var searchTick = searchTermEntity.getOrNull<TickComponent>()?.value ?? 0;
     if (searchTick + 20 < tick) {
       var term = searchTermEntity.get<SearchTermComponent>().value;
       if (term.isEmpty && entityManager.group(all:[NameComponent, UrlComponent, AvatarUrlComponent]).isEmpty) {
@@ -63,7 +63,7 @@ class ProcessResultsSystem extends TriggeredSystem {
 }
 
 class ProcessErrorsSystem extends EntityManagerSystem implements InitSystem, ExecuteSystem, CleanupSystem {
-  Group _errors;
+  late Group _errors;
   @override
   init() {
     _errors = entityManager.group(all: [SearchErrorComponent]);
@@ -72,7 +72,7 @@ class ProcessErrorsSystem extends EntityManagerSystem implements InitSystem, Exe
   @override
   execute() {
     for (var e in _errors.entities) {
-      print(e.get<SearchErrorComponent>().value);
+      print(e.getOrNull<SearchErrorComponent>()?.value);
       if (e.has(CurrentResultFlagComponent)) {
         entityManager.setUnique(SearchStateComponent(SearchState.error));
       }
@@ -86,7 +86,7 @@ class ProcessErrorsSystem extends EntityManagerSystem implements InitSystem, Exe
 }
 
 class RemoveOldResultsSystem extends EntityManagerSystem implements InitSystem, CleanupSystem {
-  Group _searchResults;
+  late Group _searchResults;
 
   @override
   init() {
