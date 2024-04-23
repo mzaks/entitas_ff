@@ -25,10 +25,10 @@ void main() {
     expect(em.entities.contains(e1), false);
     expect(em.entities.contains(e2), true);
 
-    expect(e2.get<Name>().value, "Alex");
+    expect(e2.getOrNull<Name>()?.value, "Alex");
 
     e2 += Name("Sasha");
-    expect(e2.get<Name>().value, "Sasha");
+    expect(e2.getOrNull<Name>()?.value, "Sasha");
 
     expect(e1.isAlive, false);
     expect(e2.isAlive, true);
@@ -83,11 +83,11 @@ void main() {
 
     var e3 = em.setUnique(Score(25));
 
-    expect(em.getUnique<Score>().value, 25);
+    expect(em.getUniqueOrNull<Score>()?.value, 25);
 
     em.removeUnique<Score>();
-    expect(em.getUnique<Score>()?.value, null);
-    expect(em.getUniqueEntity<Score>(), null);
+    expect(em.getUniqueOrNull<Score>()?.value, null);
+    expect(em.getUniqueEntityOrNull<Score>(), null);
     expect(e3.isAlive, false);
   });
 }

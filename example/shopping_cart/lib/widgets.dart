@@ -12,9 +12,8 @@ class ProductSquare extends StatelessWidget {
   final Entity product;
 
   ProductSquare({
-    Key key,
-    @required this.product
-  }) : super(key: key);
+    required this.product
+  }) : super();
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +23,7 @@ class ProductSquare extends StatelessWidget {
       color: color,
       child: InkWell(
         onTap: (){
-          final prevCount = product.get<CountComponent>()?.value ?? 0;
+          final prevCount = product.getOrNull<CountComponent>()?.value ?? 0;
           // ignore: unnecessary_statements
           product + CountComponent(prevCount + 1);
         },
@@ -51,15 +50,12 @@ class CartButton extends StatefulWidget {
   final Color badgeTextColor;
 
   CartButton({
-    Key key,
-    @required this.itemCount,
-    this.onPressed,
-    this.badgeColor: Colors.red,
-    this.badgeTextColor: Colors.white,
+    required this.itemCount,
+    required this.onPressed,
+    this.badgeColor = Colors.red,
+    this.badgeTextColor = Colors.white,
   })  : assert(itemCount >= 0),
-        assert(badgeColor != null),
-        assert(badgeTextColor != null),
-        super(key: key);
+        super();
 
   @override
   CartButtonState createState() {
@@ -67,10 +63,9 @@ class CartButton extends StatefulWidget {
   }
 }
 
-class CartButtonState extends State<CartButton>
-    with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
-  Animation<double> _animation;
+class CartButtonState extends State<CartButton> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   final Tween<Offset> _badgePositionTween = Tween(
     begin: const Offset(-0.5, 0.9),
@@ -82,8 +77,7 @@ class CartButtonState extends State<CartButton>
 
     return IconButton(
         icon: Stack(
-          overflow: Overflow.visible,
-          children: [
+          clipBehavior: Clip.none, children: [
             Icon(Icons.shopping_cart),
             Positioned(
               top: -8.0,
@@ -154,7 +148,7 @@ class CartPage extends StatelessWidget {
       ),
       body: group.isEmpty
           ? Center(
-          child: Text('Empty', style: Theme.of(context).textTheme.display1))
+          child: Text('Empty', style: Theme.of(context).textTheme.displayMedium))
           : ListView(
           children:
           sortedEntries.map((item) => ItemTile(item: item)).toList()),
@@ -163,7 +157,7 @@ class CartPage extends StatelessWidget {
 }
 
 class ItemTile extends StatelessWidget {
-  ItemTile({this.item});
+  ItemTile({required this.item});
   final Entity item;
 
   @override

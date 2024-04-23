@@ -29,7 +29,7 @@ abstract class EntityObserver {
   /// When a component was added, it is reflected in `newC` and `oldC` is `null`.
   /// When a component was removed, old component is reflected in `oldC` and `newC` is `null`.
   /// When a component was exchanged, old and new components are refelcted in `oldC` and `newC` respectively.
-  exchanged(Entity e, Component oldC, Component newC);
+  exchanged(Entity e, Component? oldC, Component? newC);
 }
 
 /// Class which represents an entity instance.
@@ -38,23 +38,30 @@ abstract class EntityObserver {
 ///   EntityManager em = EntityManager();
 ///   Entity e = em.createEntity();
 class Entity {
-  Entity._(this.creationIndex, this._mainObserver);
   /// Creation Index is assigned by the [EntityManager] on creation and can be seen as a sequential id of an entity.
   final int creationIndex;
   // Main observer is a reference to the [EntityManager]
   final EntityObserver _mainObserver;
+  // constructor
+  Entity({required this.creationIndex, required EntityObserver mainObserver}): _mainObserver = mainObserver;
   // Holding all components map through their type.
   Map<Type, Component> _components = Map();
-  // Holding all obeservers.
+  // Holding all observers.
   Set<EntityObserver> _observers = Set();
   /// Indicator if the entity was already destroyed.
-  /// Checked internally on netity mutating operations.
+  /// Checked internally on entity mutating operations.
   var isAlive = true;
+
   /// Returns component instance by type or `null` if not present.
-  T get<T extends Component>() {
-    var c = _components[T];
-    if (c == null) { return null;}
+  T? getOrNull<T extends Component>() {
+    Component? c = _components[T];
+    if (c == null) { return null; }
     return c as T;
+  }
+
+  /// Returns component instance by type
+  T get<T extends Component>() {
+    return _components[T] as T;
   }
 
   /// Adds component instance to the entity.
@@ -63,7 +70,7 @@ class Entity {
   /// Calling this operator on a destroyed entity is considerered an error.
   Entity operator + (Component c) {
     assert(isAlive, "Calling `+` Component on destroyed entity");
-    var oldC = _components[c.runtimeType];
+    Component? oldC = _components[c.runtimeType];
     _components[c.runtimeType] = c;
     _mainObserver.exchanged(this, oldC, c);
     for (var o in _observerList) {
@@ -157,13 +164,13 @@ class Entity {
   int get hashCode => creationIndex;
 
   // Caching the observer list, so that when observers are called they can safely remove themselves as observers
-  List<EntityObserver> __observerList;
+  List<EntityObserver>? __observerList;
   List<EntityObserver> get _observerList {
     if (__observerList == null ) {
       __observerList = List.unmodifiable(_observers);
     }
     
-    return __observerList;
+    return __observerList!;
   }
 }
 
@@ -177,9 +184,12 @@ class EntityMatcher {
   final Set<Type> _all;
   final Set<Type> _any;
   final Set<Type> _none;
-  EntityMatcher({List<Type> all, List<Type> any, List<Type> none}): _all = Set.of(all ?? []), _any = Set.of(any ?? []), _none = Set.of(none ?? []) {
-    assert((_all != null && _all.length > 0)|| (_any != null && _any.length > 0), "Matcher needs to have all or any present");
-  }
+
+  EntityMatcher({List<Type>? all, List<Type>? any, List<Type>? none}):
+      _all = Set.of(all ?? []),
+      _any = Set.of(any ?? []),
+      _none = Set.of(none ?? []);
+
 
   /// Checks if the [Entity] contains necessary components.
   bool matches(Entity e) {
@@ -266,7 +276,7 @@ class Group implements EntityObserver {
   /// Matcher which is used to check the compliance of the entities.
   final EntityMatcher matcher;
 
-  Group._(this.matcher) : assert(matcher != null);
+  Group({required this.matcher});
 
   /// Adds observer to the group which will be notified on every mutating action.
   /// Observers are stored in a [Set].
@@ -303,7 +313,7 @@ class Group implements EntityObserver {
   /// Group is an [EntityListener], this is an implementation of this protocol.
   /// Please don't use manually.
   @override
-  exchanged(Entity e, Component oldC, Component newC) {
+  exchanged(Entity e, Component? oldC, Component? newC) {
     final isRelevantAdd = newC != null && matcher.containsType(newC.runtimeType);
     final isRelevantRemove = oldC != null && matcher.containsType(oldC.runtimeType);
     if ((isRelevantAdd || isRelevantRemove) == false) {
@@ -343,9 +353,9 @@ class Group implements EntityObserver {
     if (__entities == null) {
       __entities = List.unmodifiable(_entities);
     }
-    return __entities;
+    return __entities!;
   }
-  List<Entity> __entities;
+  List<Entity>? __entities;
 
   /// Helper method to perform destruction of all entities in the group.
   destroyAllEntities() {
@@ -367,13 +377,13 @@ class Group implements EntityObserver {
   int get hashCode => matcher.hashCode;
 
   // Caching the observer list, so that when observers are called they can safely remove themselves as observers
-  List<GroupObserver> __observerList = List(0);
+  List<GroupObserver>? __observerList; //  = List(0)
   List<GroupObserver> get _observerList {
     if (__observerList == null) {
       __observerList = List.unmodifiable(_observers);
     }
     
-    return __observerList;
+    return __observerList!;
   }
 }
 
@@ -382,7 +392,7 @@ abstract class EntityManagerObserver {
   entityCreated(Entity e);
 }
 
-/// EntityManager is the central peace of entitas_ff. It can b eunderstood as a central managing data structure.
+/// EntityManager is the central peace of entitas_ff. It can be understood as a central managing data structure.
 /// It manages the lifecycle of [Entity] instances and stores instances of [Group], which we use to access entities with certain qualities.
 /// EntityManager is observable, see `addObserver`, `removeObserver`.
 class EntityManager implements EntityObserver {
@@ -405,7 +415,7 @@ class EntityManager implements EntityObserver {
   /// During creation the entity will receive a creation index id and it will receive all group as observers, becuase every entity might become part of the group at some point.
   /// At the end it will notify own observers that an eneitty was created.
   Entity createEntity() {
-    var e = Entity._(_currentEntityIndex, this);
+    var e = Entity(creationIndex: _currentEntityIndex, mainObserver: this);
     _entities[_currentEntityIndex] = e;
     _currentEntityIndex++;
     for (var g in _groupsByMatcher.values) {
@@ -427,7 +437,7 @@ class EntityManager implements EntityObserver {
   /// Group is an [EntityListener], this is an implementation of this protocol.
   /// Please don't use manually.
   @override
-  exchanged(Entity e, Component oldC, Component newC) {
+  exchanged(Entity e, Component? oldC, Component? newC) {
     if (newC is UniqueComponent || oldC is UniqueComponent) {
       if (oldC != null && newC == null) {
         _uniqueEntities.remove(oldC.runtimeType);
@@ -469,7 +479,7 @@ class EntityManager implements EntityObserver {
     return e;
   }
 
-  /// Removes unqiue component on an entity.
+  /// Removes unique component on an entity.
   /// If entity does not have any other components after removal, it is destroyed.
   removeUnique<T extends UniqueComponent>() {
     var e = _uniqueEntities[T];
@@ -482,19 +492,33 @@ class EntityManager implements EntityObserver {
     }
   }
 
-  /// Returns the component instance or `null`.
+  /// Returns the component instance or throws an exception if component is `null`.
   T getUnique<T extends UniqueComponent>() {
-    return _uniqueEntities[T]?.get<T>();
+    final component = _uniqueEntities[T]?.getOrNull<T>();
+    if (component == null) throw new Exception("Component is null");
+    return component;
+  }
+
+  /// Returns the component instance or `null`.
+  T? getUniqueOrNull<T extends UniqueComponent>() {
+    return _uniqueEntities[T]?.getOrNull<T>();
+  }
+
+  /// Returns [Entity] instance which hold the unique component, or throws an exception if component is `null`.
+  Entity getUniqueEntity<T extends UniqueComponent>() {
+    final entity = _uniqueEntities[T];
+    if (entity == null) throw new Exception("Entity is null");
+    return entity;
   }
 
   /// Returns [Entity] instance which hold the unique component, or `null`.
-  Entity getUniqueEntity<T extends UniqueComponent>() {
+  Entity? getUniqueEntityOrNull<T extends UniqueComponent>() {
     return _uniqueEntities[T];
   }
 
-  /// Convinience method to call `groupMatching` method.
+  /// Convenience method to call `groupMatching` method.
   /// Creates an instance of [EntityMatcher]
-  Group group({List<Type> all, List<Type> any, List<Type> none}) {
+  Group group({List<Type>? all, List<Type>? any, List<Type>? none}) {
     var matcher = EntityMatcher(all: all, any: any, none: none);
     return groupMatching(matcher);
   }
@@ -504,12 +528,11 @@ class EntityManager implements EntityObserver {
   /// It is safe to call this method multiple times as the groups are cached and user will receive same cached instance.
   /// If a new group needs to be created it will be directly populated by existing matching entities.
   Group groupMatching(EntityMatcher matcher) {
-    assert(matcher != null);
     var group = _groupsByMatcher[matcher];
     if (group != null) {
       return group;
     }
-    group = Group._(matcher);
+    group = Group(matcher: matcher);
     for (var e in _entities.values) {
       e.addObserver(group);
       if (matcher.matches(e)) {
@@ -537,13 +560,13 @@ class EntityManager implements EntityObserver {
   List<Entity> get entities => List.unmodifiable(_entities.values);
 
   // Caching the observer list, so that when observers are called they can safely remove themselves as observers
-  List<EntityManagerObserver> __observerList = List(0);
+  List<EntityManagerObserver>? __observerList; //= List(0);
   List<EntityManagerObserver> get _observerList {
     if (__observerList == null) {
       __observerList = List.unmodifiable(_observers);
     }
     
-    return __observerList;
+    return __observerList!;
   }
 }
 
@@ -558,7 +581,7 @@ typedef T KeyProducer<C extends Component, T>(C c);
 /// A situation, where multiple components are matching the same [EntityMap] key is considered an error.
 /// Please use [EntityMultiMap] to cover such scenario.
 class EntityMap<C extends Component, T> implements EntityObserver, EntityManagerObserver {
-  // holds entities entities mapped agauinst key
+  // holds entities entities mapped against key
   final Map<T, Entity> _entities = Map();
   // holds key producer instance
   final KeyProducer<C, T> _keyProducer;
@@ -567,7 +590,7 @@ class EntityMap<C extends Component, T> implements EntityObserver, EntityManager
     for (var e in entityManager.entities) {
       e.addObserver(this);
       if (e.has(C)) {
-        exchanged(e, null, e.get<C>());
+        exchanged(e, null, e.getOrNull<C>());
       }
     }
   }
@@ -589,25 +612,23 @@ class EntityMap<C extends Component, T> implements EntityObserver, EntityManager
   /// EntityMap is an [EntityListener], this is an implementation of this protocol.
   /// Please don't use manually.
   @override
-  exchanged(Entity e, Component oldC, Component newC) {
-    if (oldC is C || newC is C) {
-      if(oldC != null) {
-        _entities.remove(_keyProducer(oldC));
-      }
-      if (newC != null ) {
-        assert(_entities[_keyProducer(newC)] == null, "Multiple values for same key are prohibited in EntityMap, please use EntityMultiMap instead.");
-        _entities[_keyProducer(newC)] = e;
-      }
+  exchanged(Entity e, Component? oldC, Component? newC) {
+    if(oldC is C) {
+      _entities.remove(_keyProducer(oldC));
+    }
+    if (newC is C) {
+      assert(_entities[_keyProducer(newC)] == null, "Multiple values for same key are prohibited in EntityMap, please use EntityMultiMap instead.");
+      _entities[_keyProducer(newC)] = e;
     }
   }
 
   /// Get an [Entity] instance or `null` based on provided key.
-  Entity get(T key) {
+  Entity? get(T key) {
     return _entities[key];
   }
 
   /// Get an [Entity] instance or `null` based on provided key.
-  Entity operator [](T key) {
+  Entity? operator [](T key) {
     return _entities[key];
   }
 }
@@ -627,7 +648,7 @@ class EntityMultiMap<C extends Component, T> implements EntityObserver, EntityMa
     for (var e in entityManager.entities) {
       e.addObserver(this);
       if (e.has(C)) {
-        exchanged(e, null, e.get<C>());
+        exchanged(e, null, e.getOrNull<C>());
       }
     }
   }
@@ -649,26 +670,24 @@ class EntityMultiMap<C extends Component, T> implements EntityObserver, EntityMa
   /// EntityMultiMap is an [EntityManagerListener], this is an implementation of this protocol.
   /// Please don't use manually.
   @override
-  exchanged(Entity e, Component oldC, Component newC) {
-    if (oldC is C || newC is C) {
-      if(oldC != null) {
-        _entities[_keyProducer(oldC)]?.remove(e);
-      }
-      if (newC != null ) {
-        var list = _entities[_keyProducer(newC)] ?? List();
-        list.add(e);
-        _entities[_keyProducer(newC)] = list;
-      }
+  exchanged(Entity e, Component? oldC, Component? newC) {
+    if(oldC is C) {
+      _entities[_keyProducer(oldC)]?.remove(e);
+    }
+    if (newC is C) {
+      var list = _entities[_keyProducer(newC)] ?? List.empty(growable: true);
+      list.add(e);
+      _entities[_keyProducer(newC)] = list;
     }
   }
 
   /// Get a list of [Entity] instances or an empty list based on provided key.
   List<Entity> get(T key) {
-    return List.unmodifiable(_entities[key] ?? List());
+    return List.unmodifiable(_entities[key] ?? List.empty());
   }
 
   /// Get a list of [Entity] instances or an empty list based on provided key.
   List<Entity> operator [](T key) {
-    return List.unmodifiable(_entities[key] ?? List());
+    return List.unmodifiable(_entities[key] ?? List.empty());
   }
 }

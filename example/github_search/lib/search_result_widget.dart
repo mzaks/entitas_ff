@@ -91,7 +91,7 @@ class SearchResultWidget extends StatelessWidget {
       new MaterialPageRoute<Null>(
         builder: (BuildContext context) {
           return new Scaffold(
-            resizeToAvoidBottomPadding: false,
+            resizeToAvoidBottomInset: false,
             body: new GestureDetector(
               key: new Key(avatarUrl),
               onTap: () => Navigator.pop(context),

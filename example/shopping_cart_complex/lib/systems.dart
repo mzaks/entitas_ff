@@ -37,7 +37,7 @@ class AddItemToShoppingCartSystem extends ReactiveSystem {
   @override
   executeWith(List<Entity> entities) {
     for (var e in entities) {
-      var newCount = (e.get<CountComponent>()?.value ?? 0) + 1;
+      var newCount = (e.getOrNull<CountComponent>()?.value ?? 0) + 1;
       e += CountComponent(newCount);
     }
   }
@@ -52,7 +52,7 @@ class RemoveItemFromShoppingCartSystem extends ReactiveSystem {
   @override
   executeWith(List<Entity> entities) {
     for (var e in entities) {
-      final newCount = (e.get<CountComponent>()?.value ?? 0) - 1;
+      final newCount = (e.getOrNull<CountComponent>()?.value ?? 0) - 1;
       if (newCount > 0) {
         e += CountComponent(newCount);
       } else {
@@ -77,18 +77,18 @@ class ComputeAmountInSelectedCurrencySystem extends TriggeredSystem {
 
   @override
   executeOnChange() {
-    var selectedCurrency = entityManager.getUnique<SelectedCurrencyComponent>()?.value;
+    var selectedCurrency = entityManager.getUniqueOrNull<SelectedCurrencyComponent>()?.value;
     if (selectedCurrency == null) return;
-    var conversionRates = entityManager.getUnique<CurrentConversionRateComponent>();
+    var conversionRates = entityManager.getUniqueOrNull<CurrentConversionRateComponent>();
     if (conversionRates == null) return;
     var items = entityManager.group(all: [PriceComponent]);
     for (var item in items.entities) {
-      final price = item.get<PriceComponent>();
-      if (price.currency == selectedCurrency) {
-        item += AmountInSelectedCurrencyComponent(price.amount);
+      final price = item.getOrNull<PriceComponent>();
+      if (price?.currency == selectedCurrency) {
+        item += AmountInSelectedCurrencyComponent(price?.amount ?? 0);
       } else {
         final rate = selectedCurrency == Currency.usd ? conversionRates.euroToUsd : conversionRates.usdToEuro;
-        item += AmountInSelectedCurrencyComponent(price.amount * rate);
+        item += AmountInSelectedCurrencyComponent(price?.amount ?? 0 * rate);
       }
     }
   }
@@ -102,7 +102,7 @@ class ComputePriceLabelSystem extends ReactiveSystem {
 
   @override
   executeWith(List<Entity> entities) {
-    final currency = entityManager.getUnique<SelectedCurrencyComponent>().value;
+    final currency = entityManager.getUniqueOrNull<SelectedCurrencyComponent>()?.value;
     if ( currency == null) return;
     for (var item in entities) {
       item += PriceLabelComponent(priceLabel(currency, item.get<AmountInSelectedCurrencyComponent>().value));
@@ -140,8 +140,8 @@ class ComputeTotalSumSystem extends TriggeredSystem {
   @override
   executeOnChange() {
     final sum = entityManager.group(all: [CountComponent, AmountInSelectedCurrencyComponent]).entities.fold(0.0, (sum, e) => sum
-        + (e.get<AmountInSelectedCurrencyComponent>()?.value ?? 0.0)
-            * (e.get<CountComponent>()?.value ?? 0)
+        + (e.getOrNull<AmountInSelectedCurrencyComponent>()?.value ?? 0.0)
+            * (e.getOrNull<CountComponent>()?.value ?? 0)
     );
     entityManager.setUnique(TotalAmountComponent(sum));
   }

@@ -42,7 +42,7 @@ class SearchErrorWidget extends OverlayWithWarning {
   String get message => "An error occured";
 
   @override
-  Color get messageColor => Colors.red[300];
+  Color get messageColor => Colors.redAccent;
 }
 
 class SearchIntroWidget extends OverlayWithWarning {
@@ -54,7 +54,7 @@ class SearchIntroWidget extends OverlayWithWarning {
   String get message => "Enter a search term to begin";
 
   @override
-  Color get messageColor => Colors.green[100];
+  Color get messageColor => Colors.green;
 }
 
 class EmptyResultWidget extends OverlayWithWarning {
@@ -66,7 +66,7 @@ class EmptyResultWidget extends OverlayWithWarning {
   String get message => "No results";
 
   @override
-  Color get messageColor => Colors.yellow[100];
+  Color get messageColor => Colors.yellow;
 }
 
 class SearchLoadingWidget extends StatelessWidget {

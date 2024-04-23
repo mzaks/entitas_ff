@@ -26,7 +26,7 @@ Widget buildApp() {
 }
 
 class SearchScreen extends StatelessWidget {
-  SearchScreen({Key key}) : super(key: key);
+  SearchScreen() : super();
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +53,9 @@ class SearchScreen extends StatelessWidget {
             EntityObservingWidget(
               provider: (m) => m.getUniqueEntity<SearchStateComponent>(),
               builder: (e, context) {
-                final state = e.get<SearchStateComponent>();
+                final state = e.getOrNull<SearchStateComponent>();
                 return Expanded(
-                  child: overlay(state.value),
+                  child: overlay(state?.value ?? SearchState.empty),
                 );
               },
             )
